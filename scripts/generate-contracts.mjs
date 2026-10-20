@@ -390,14 +390,4 @@ export function generateContractArtifacts({ root = ownRoot, sdkRoot = ownSdkRoot
   ])
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const args = process.argv.slice(2)
-  if (args.length !== 1 || !['--check', '--write'].includes(args[0])) throw new Error('Usage: node examples/micro-app-sdk/scripts/generate-contracts.mjs --check|--write')
-  let drift = false
-  for (const [relative, content] of generateContractArtifacts()) {
-    const file = path.join(ownRoot, relative)
-    if (args[0] === '--write') { mkdirSync(path.dirname(file), { recursive: true }); writeFileSync(file, content) }
-    else { try { if (readFileSync(file, 'utf8') !== content) { console.error('Contract artifact drift: ' + relative); drift = true } } catch { console.error('Missing contract artifact: ' + relative); drift = true } }
-  }
-  if (drift) process.exitCode = 1
-}
+// Library entry; use npm run build/check for bounded repository outputs.
