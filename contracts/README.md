@@ -1,57 +1,25 @@
-# Public wire contracts
+# 公共协议与生成材料
 
-`schema.json` is the schema source. `x-release-contract` and `x-release-limit`
-resolve only through the SDK's `release.json`; they are not additional version or
-limit registries. The fixed generator emits standard Draft 2020-12 JSON Schema,
-TypeScript declarations, and a standalone Rust serde module. The platform's
-`backend/src/public_contract.rs` is an exact generated copy.
+## 协议来源
 
-```sh
-node examples/micro-app-sdk/scripts/generate-contracts.mjs --write
-node examples/micro-app-sdk/scripts/generate-contracts.mjs --check
-cargo test --locked --manifest-path backend/Cargo.toml --bin saas-platform-backend public_contract_tests
-```
+contracts/schema.json 定义公共结构。x-release-contract、x-release-limit 从 release.json 解析。生成器输出 JSON Schema Draft 2020-12、TypeScript 声明和独立 Rust serde 模块，消费者保存固定版本副本。
 
-The SDK's top-level synchronization command also calls the generator API and
-checks these outputs along with browser artifacts. Generation uses Node alone;
-Rust formatting is an independent check, so the frontend image does not need a
-Rust toolchain. Editing an output directly will fail the synchronization check.
+在 SDK 源仓库根使用 npm run build 生成，npm run check 校验，npm test 验证行为。消费者只校验自己固定的材料，不在构建时运行其他仓库的生成器。
 
-The data declarations are generated from the schema's `$defs`. The generator
-keeps two explicit, small templates: TypeScript host-owned `AbortSignal` and
-lifecycle callbacks, which are not JSON values; and Rust three-state nullable
-fields plus bounded parsing/shape helpers. Those helpers are hand-authored logic,
-not an assertion that every JSON Schema keyword has been compiled into Rust.
-Use the generated schema when full schema validation is needed. Date-time fields
-remain wire strings in the dependency-light Rust module. Consumers must parse
-and compare their expiry against a trusted clock before using a context.
+## 解析边界
 
-The Rust module depends only on serde and serde_json. It contains no HTTP server,
-platform client, database model, SQL query, token refresh, or shared storage.
-Wire types containing an application token deliberately do not implement `Debug`.
-Bounded `from_json` methods replace parser failures with the fixed
-`PUBLIC_CONTRACT_INVALID` error and do not retain the input or parser error.
-Unused generated DTOs are locally permitted; no business lint is disabled.
+字段来自 schema 的 $defs。AbortSignal、生命周期回调、Rust 三态可空字段及有界解析使用显式模板，不能把它当作完整编译所有 JSON Schema 关键字。完整结构校验使用生成 schema，期限需要消费者解析并结合可信时钟确认。
 
-`organizationScopeIds` has three distinct states. A missing field on an older
-context restricts the consumer to the current organization. An explicit `null`
-is retained as the authoritative platform-root response. A list must contain
-the current organization and respect the registered limit; it is never silently
-truncated. Rust's `OptionalNullable` preserves these states during a round trip.
-The parser cannot establish who sent `null`: a backend must first verify its
-platform transport and the introspection/context identity binding.
+Rust 模块只依赖 serde、serde_json，不含 HTTP、SQL、令牌刷新和业务模型。带令牌的类型不实现 Debug，解析错误统一为 PUBLIC_CONTRACT_INVALID，不保存敏感输入。
 
-Context and props parsing checks wire versions and bounds, not authorization.
-Each protected business request must still validate the application token,
-audience, user/tenant/organization binding, current expiry, operation permission,
-resource/action grant, and record ownership. Tenant and organization constraints
-must remain in the business SQL query. This phase does not migrate the existing
-JavaScript backend reference or implement the future Rust business service.
+## 组织范围与授权
 
-`fixtures/public-wire.json` contains fixed non-secret public examples used by the
-Rust consumer tests and available to JavaScript schema tests. Tests compile the
-standalone generated module separately from the platform's vendored module and
-exercise version rejection, exact round trips, missing/null/list ceilings,
-required nullable fields, response limits, tagged notification targets, public
-versus internal socket context, and APP/SYSTEM publication coherence. They do
-not claim real backend authorization or Socket.IO compatibility.
+organizationScopeIds 有三态：缺失表示旧上下文仅限当前组织；null 表示平台根上下文；数组必须包含当前组织并符合限额，不能截断。OptionalNullable 保留序列化往返的三态。
+
+解析器不能证明字段发送者身份。业务后端先验证可信平台传输和身份绑定，再逐请求校验令牌受众、用户/租户/组织、期限、permission、资源动作数据授权及记录归属；SQL 继续落实租户与组织范围。结构合法不等于已授权。
+
+## 测试与固定副本
+
+fixtures/public-wire.json 是非秘密示例，覆盖版本、结构往返、可空状态、限额、通知目标和公开/内部上下文等协议场景，不代替实际后端或 Socket.IO 验收。
+
+固定消费副本的协议与可执行字节按来源摘要校验。中文文档可有单独本地修订记录，原始文档摘要保留在 SOURCE.json，不将翻译误认为上游协议版本升级。
