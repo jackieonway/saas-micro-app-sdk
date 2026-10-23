@@ -13,7 +13,7 @@ try {
   const prefix='examples/micro-app-sdk/'
   const selected=[...artifacts].filter(([file])=>file.startsWith(prefix) && file!==prefix+'package.json')
   const expected=new Set(selected.map(([file])=>file.slice(prefix.length)))
-  for (const name of readdirSync(path.join(root,'releases',release.sdkVersion))) {
+  for (const name of existsSync(path.join(root,'releases',release.sdkVersion)) ? readdirSync(path.join(root,'releases',release.sdkVersion)) : []) {
     assert(expected.has(`releases/${release.sdkVersion}/${name}`), 'Unregistered SDK release file')
   }
   for (const [file,content] of selected) {

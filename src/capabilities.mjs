@@ -13,27 +13,9 @@ const clientChecks = Object.freeze([
 
 const modeChecks = Object.freeze({
   client: clientChecks,
-  iframe: Object.freeze([...clientChecks,
-    ['MessageChannel', (env) => typeof env.MessageChannel === 'function'],
-    ['postMessage', (env) => typeof env.postMessage === 'function'],
-    ['addEventListener', (env) => typeof env.addEventListener === 'function'],
-    ['removeEventListener', (env) => typeof env.removeEventListener === 'function'],
-  ]),
-  host: Object.freeze([...clientChecks,
-    ['AbortSignal.any', (env) => typeof env.AbortSignal?.any === 'function'],
-    ['AbortSignal.timeout', (env) => typeof env.AbortSignal?.timeout === 'function'],
-    ['MessageChannel', (env) => typeof env.MessageChannel === 'function'],
-    ['MutationObserver', (env) => typeof env.MutationObserver === 'function'],
-    ['iframe.sandbox', (env) => typeof env.HTMLIFrameElement === 'function' &&
-      'sandbox' in env.HTMLIFrameElement.prototype],
-    ['document.createElement', (env) => typeof env.document?.createElement === 'function'],
-    ['Blob', (env) => typeof env.Blob === 'function'],
-    ['URL.createObjectURL', (env) => typeof env.URL?.createObjectURL === 'function'],
-    ['URL.revokeObjectURL', (env) => typeof env.URL?.revokeObjectURL === 'function'],
-  ]),
 })
 
-/** Check the APIs used by this mode; a missing isolation API never enables a weaker mode. */
+/** Check only browser APIs used by the authorization HTTP client. */
 export function detectBrowserCapabilities(mode = 'client', environment = globalThis) {
   if (!Object.hasOwn(modeChecks, mode)) throw new TypeError('Unsupported SDK capability mode')
   const missing = modeChecks[mode].filter(([, check]) => {

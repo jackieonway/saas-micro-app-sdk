@@ -3,5 +3,4 @@ export { MicroSdkError, DEFAULT_MAX_RESPONSE_BYTES, MAX_RESPONSE_BYTES, requestW
 export { createContextClient } from './context-client.mjs'
 export { createNotificationPublisher } from './notification-publisher.mjs'
 export { detectBrowserCapabilities, assertBrowserCapabilities } from './capabilities.mjs'
-export { installIframeBridge } from './iframe-bridge.js'
 export { authorizationContextSignature, sameAuthorizationContext } from './context-updates.mjs'

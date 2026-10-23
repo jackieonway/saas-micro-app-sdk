@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
+import * as sdk from '../index.mjs'
 import { SDK_VERSION, createContextClient, createNotificationPublisher, MicroSdkError, requestWithContext,
-  authorizationContextSignature, sameAuthorizationContext } from '../releases/1.0.0/index.mjs'
+  authorizationContextSignature, sameAuthorizationContext, detectBrowserCapabilities, assertBrowserCapabilities,
+  CONTEXT_CONTRACT_VERSION, MICRO_PROPS_CONTRACT_VERSION, NOTIFICATION_CONTRACT_VERSION } from '../index.mjs'
 
 const deferred = () => { let resolve; const promise = new Promise(done => { resolve = done }); return { promise, resolve } }
 function props(extra = {}) {
@@ -12,6 +14,42 @@ function props(extra = {}) {
 }
 const json = body => new Response(JSON.stringify(body), { headers: { 'Content-Type': 'application/json' } })
 const schema = JSON.parse(readFileSync(new URL('../contracts/schema.json', import.meta.url), 'utf8'))
+
+test('active SDK 2.0 entry retains independently versioned business contracts without iframe exports', () => {
+  assert.equal(SDK_VERSION, '2.0.0')
+  assert.equal(CONTEXT_CONTRACT_VERSION, '1.0')
+  assert.equal(MICRO_PROPS_CONTRACT_VERSION, '2.0')
+  assert.equal(NOTIFICATION_CONTRACT_VERSION, '1.0')
+  assert.equal(Object.hasOwn(sdk, 'installIframeBridge'), false)
+})
+
+test('client capability mode needs only request APIs and rejects removed host and iframe modes', () => {
+  const environment = { fetch() {}, Headers, URL, AbortController, DOMException, TextEncoder, TextDecoder, ReadableStream, Response, crypto }
+  const result = detectBrowserCapabilities('client', environment)
+  assert.deepEqual(result, { mode: 'client', supported: true, missing: [] })
+  assert.ok(Object.isFrozen(result)); assert.ok(Object.isFrozen(result.missing))
+  assert.deepEqual(detectBrowserCapabilities(undefined, environment), result)
+  assert.deepEqual(assertBrowserCapabilities('client', environment), result)
+  assert.equal(detectBrowserCapabilities().supported, true)
+  for (const mode of ['host', 'iframe', 'unknown']) {
+    assert.throws(() => detectBrowserCapabilities(mode, environment), { name: 'TypeError', message: 'Unsupported SDK capability mode' })
+    assert.throws(() => assertBrowserCapabilities(mode, environment), { name: 'TypeError', message: 'Unsupported SDK capability mode' })
+  }
+})
+
+test('client capability failures expose fixed API names and tolerate throwing environment getters', () => {
+  const environment = { fetch() {}, Headers, URL, AbortController, DOMException, TextEncoder, TextDecoder, ReadableStream, Response, crypto }
+  Object.defineProperty(environment, 'fetch', { get() { throw new Error('sentinel-private-token') } })
+  const result = detectBrowserCapabilities('client', environment)
+  assert.deepEqual(result, { mode: 'client', supported: false, missing: ['fetch'] })
+  assert.throws(() => assertBrowserCapabilities('client', environment), error => {
+    assert.equal(error.code, 'BROWSER_CAPABILITIES_UNSUPPORTED')
+    assert.deepEqual(error.missing, ['fetch'])
+    assert.equal(error.message, 'Required browser capabilities are unavailable: fetch')
+    assert.equal(String(error.stack).includes('sentinel'), false)
+    return true
+  })
+})
 
 test('registered context client forces omitted credentials and captured Bearer, preserves a valid request identifier', async () => {
   const requestId = '02345678-1234-4321-abcd-123456789abc', requests = []
@@ -118,12 +156,12 @@ test('caller cancellation, host cancellation and expired contexts fail closed', 
   expired.dispose()
 })
 
-test('unknown SDK and MicroProps versions are explicitly rejected while the exact versionless baseline remains supported', () => {
-  for (const extra of [{ sdkVersion: '2.0.0' }, { sdkVersion: '1.0.1' }, { contractVersion: '3.0' }]) {
+test('archived and unknown SDK versions are rejected while the versionless MicroProps baseline remains supported', () => {
+  for (const extra of [{ sdkVersion: '1.0.0' }, { sdkVersion: '1.0.1' }, { sdkVersion: '2.0.1' }, { contractVersion: '3.0' }]) {
     assert.throws(() => createContextClient(props(extra)), error => error instanceof MicroSdkError && error.kind === 'PROTOCOL')
   }
   const legacy = createContextClient(props({ sdkVersion: undefined }))
-  assert.equal(legacy.sdkVersion, '1.0.0'); legacy.dispose()
+  assert.equal(legacy.sdkVersion, '2.0.0'); legacy.dispose()
   const client = createContextClient(props())
   assert.throws(() => client.update(props({ sdkVersion: '999.0.0' })), error => error.code === 'UNSUPPORTED_SDK_VERSION')
   assert.equal(client.current(), null)
@@ -139,7 +177,7 @@ test('text transport preserves CSV BOM, observes a smaller bound and forbids rai
 test('notification helper preserves event idempotency and only consumes the supplied active client', async () => {
   const requests = [], client = createContextClient(props(), async (url, options) => { requests.push({ url, ...options }); return json({ duplicate: true }) })
   const publisher = createNotificationPublisher(client), body = { idempotencyKey: 'event-stable', title: 'Reminder' }
-  assert.equal(publisher.sdkVersion, '1.0.0')
+  assert.equal(publisher.sdkVersion, '2.0.0')
   assert.deepEqual(await publisher.publish(body), { duplicate: true }); await publisher.publish(body)
   assert.equal(requests[0].url, '/api/apps/orders/notifications'); assert.equal(requests[0].body, requests[1].body)
   assert.equal(requests[0].credentials, 'omit')

@@ -8,7 +8,7 @@ export function createWorkspace() {
   const directory = mkdtempSync(path.join(temporary, 'saas-sdk-build-'))
   const target = path.join(directory, 'examples/micro-app-sdk')
   mkdirSync(target, {recursive:true})
-  for (const name of ['src','scripts','contracts','compat','generated','releases','release.json','iframe-bridge.js','index.mjs','index.d.mts','context-client.mjs','notification-publisher.mjs','package.json']) {
+  for (const name of ['src','scripts','contracts','generated','releases','release.json','index.mjs','index.d.mts','package.json']) {
     cpSync(path.join(sdkRoot,name),path.join(target,name),{recursive:true})
   }
   return { directory, dispose() {

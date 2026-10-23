@@ -101,17 +101,26 @@ export interface MicroProps extends MicroPropsWire {
   onNavigate: (path: string) => void
   onNotify: (message: string, variant?: MicroNotifyVariant) => void
 }
-export interface MicroLifecycle {
-  name: string
-  mount: (container: HTMLElement, props: MicroProps) => void | Promise<void>
-  unmount: () => void | Promise<void>
-  update?: (props: MicroProps) => void | Promise<void>
+export interface DownloadCsvOptions {
+  resource: string
+  filename: string
+  content: string
 }
-export interface MicroEsmModule {
-  __MICRO_APP__?: MicroLifecycle
-  mount?: MicroLifecycle["mount"]
-  unmount?: MicroLifecycle["unmount"]
-  update?: MicroLifecycle["update"]
+export interface PlatformServices {
+  downloadCsv?: (file: DownloadCsvOptions) => Promise<void>
+}
+/** Standard qiankun props wrap the business contract without changing its data fields. */
+export interface QiankunProps {
+  name?: string
+  container: HTMLElement
+  platform: MicroProps
+  services?: PlatformServices
+}
+export interface QiankunLifecycle {
+  bootstrap: (props: QiankunProps) => void | Promise<void>
+  mount: (props: QiankunProps) => void | Promise<void>
+  unmount: (props: QiankunProps) => void | Promise<void>
+  update?: (props: QiankunProps) => void | Promise<void>
 }
 `
 
@@ -375,7 +384,6 @@ export function generateContractArtifacts({ root = ownRoot, sdkRoot = ownSdkRoot
     '/// The only registered SDK release; wire contract majors remain independently versioned.\npub const SDK_VERSION: &str = ' + JSON.stringify(registered.sdkVersion) + ';\n' +
     '/// Context wire contract supported by this release.\npub const CONTEXT_VERSION: &str = ' + JSON.stringify(registered.contracts.context) + ';\n' +
     '/// Props wire contract supported by this release.\npub const MICRO_PROPS_VERSION: &str = ' + JSON.stringify(registered.contracts.microProps) + ';\n' +
-    '/// Iframe channel contract supported by this release.\npub const IFRAME_VERSION: &str = ' + JSON.stringify(registered.contracts.iframe) + ';\n' +
     '/// Notification wire contract supported by this release.\npub const NOTIFICATION_VERSION: &str = ' + JSON.stringify(registered.contracts.notification) + ';\n' +
     '/// Maximum bounded public JSON response bytes.\npub const RESPONSE_LIMIT_BYTES: usize = ' + registered.limits.maxJsonResponseBytes + ';\n' +
     '/// Maximum explicitly listed organizations; never silently truncated.\npub const ORGANIZATION_LIMIT: usize = ' + registered.limits.maxOrganizationScopeIds + ';\n\n' +
@@ -386,7 +394,6 @@ export function generateContractArtifacts({ root = ownRoot, sdkRoot = ownSdkRoot
     [relative + '/generated/schema.json', JSON.stringify(schema, null, 2) + '\n'],
     [relative + '/generated/types.d.ts', types],
     [relative + '/generated/protocol.rs', rust],
-    ['backend/src/public_contract.rs', rust],
   ])
 }
 

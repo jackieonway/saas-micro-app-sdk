@@ -1,1 +1,1 @@
-export * from './releases/1.0.0/index.mjs'
+export * from './releases/2.0.0/index.mjs'
