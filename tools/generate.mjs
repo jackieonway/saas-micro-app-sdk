@@ -19,8 +19,8 @@ export function validateRelease(release) {
   for (const version of Object.values(release.contracts)) assert.match(version, /^\d+\.\d+$/)
   assert.deepEqual(release.supportedSdkVersions, [release.sdkVersion], 'Register actual releases only')
   for (const value of Object.values(release.limits)) assert(Number.isSafeInteger(value) && value > 0,'Invalid SDK limit')
-  assert.equal(release.sdkVersion, '2.0.0', 'Register a new major for the qiankun-only runtime')
-  assert.equal(release.compatibility.previousRelease, '1.0.0')
+  assert.equal(release.sdkVersion, '3.0.0', 'Register a new major for the UUID v7-only runtime')
+  assert.equal(release.compatibility.previousRelease, '2.0.0')
   assert(!Object.hasOwn(release, 'legacy'), 'Archived runtimes are not active compatibility inputs')
   return release
 }
@@ -67,7 +67,7 @@ export async function generateArtifacts({ root = repository } = {}) {
   // The async build API supports a canonical virtual protocol module; see below.
   const { build } = require('esbuild')
   const compile = async (entry,format) => (await build({ absWorkingDir:root,entryPoints:[`${sdkRelative}/src/${entry}`],
-    bundle:true,format,platform:'browser',target:'es2022',write:false,charset:'utf8',legalComments:'inline',plugins:[plugin],
+    nodePaths:[path.join(repository,'node_modules')],bundle:true,format,platform:'browser',target:'es2022',write:false,charset:'utf8',legalComments:'inline',plugins:[plugin],
     banner:{js:`/* Generated SaaS Micro SDK ${release.sdkVersion}; source: ${sdkRelative}/release.json */`},logLevel:'silent' })).outputFiles[0].text
   const classic = await compile('classic-entry.mjs','iife'), esm = await compile('index.mjs','esm')
   const base = `${sdkRelative}/releases/${release.sdkVersion}`

@@ -1,5 +1,6 @@
 import { SDK_VERSION, assertSupportedSdkVersion } from '../generated/protocol.mjs'
 import { contextAbortError, protocolError } from './http.mjs'
+import { isUuidV7 } from './uuid.mjs'
 
 /** Reuse one idempotency key for one event. The service independently validates recipients and grants. */
 export function createNotificationPublisher(client) {
@@ -14,6 +15,11 @@ export function createNotificationPublisher(client) {
       const current = client.current()
       if (!current?.appCode) throw contextAbortError()
       if (typeof body?.idempotencyKey !== 'string' || !body.idempotencyKey.trim()) {
+        throw protocolError('INVALID_NOTIFICATION')
+      }
+      const target = body.target
+      if ((target?.kind === 'USER' && (!isUuidV7(target.userId) || !isUuidV7(target.organizationId))) ||
+          (target?.kind === 'ORGANIZATION' && !isUuidV7(target.organizationId))) {
         throw protocolError('INVALID_NOTIFICATION')
       }
       let payload

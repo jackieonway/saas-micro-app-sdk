@@ -1,5 +1,12 @@
 # Release 日志
 
+## 3.0.0 — 2026-10-24
+
+- 登记新的 `REPOSITORY_CANDIDATE` 交付版本，系统身份与请求标识统一要求 RFC UUID v7。拒绝旧 v4、nil 和错误 variant；使用固定 `uuid@13.0.0` 及 `crypto.getRandomValues` 生成 v7。
+- SDK 主版本变化，MicroProps 2.0、Context 1.0、Notification 1.0 的字段与独立版本保持不变。当前支持集合仅含 SDK 3.0.0。
+- 新建 `releases/3.0.0/` 并更新根导出、Schema、TypeScript 与 Rust DTO；1.0.0/2.0.0 历史发布字节保持不变。此登记不代表已经发布到外部 npm registry。
+- 生成与字节检查通过，30 项 SDK 测试通过，包括安全生成、旧 ID 拒绝、独立消费及两个历史归档验证。
+
 ## 2.0.1 — 2026-10-23
 
 - 仓库开发工具包由 `2.0.0` 升级为 `2.0.1`。本次变更仅涉及 Node.js 工具链；`release.json.sdkVersion`、SDK 运行时、固定发布目录 `releases/2.0.0/` 和消费者协议继续使用 `2.0.0`。

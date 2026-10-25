@@ -15,27 +15,27 @@
     "NotificationType": { "type": "string", "enum": ["INFO", "SUCCESS", "WARNING", "SECURITY"] },
     "MicroUser": {
       "type": "object", "required": ["id", "username", "displayName"],
-      "properties": { "id": { "type": "string", "minLength": 1 }, "username": { "type": "string" }, "displayName": { "type": "string" } }
+      "properties": { "id": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "username": { "type": "string" }, "displayName": { "type": "string" } }
     },
     "MicroTenant": {
       "type": "object", "required": ["id", "code", "name"],
-      "properties": { "id": { "type": "string", "minLength": 1 }, "code": { "type": "string" }, "name": { "type": "string" } }
+      "properties": { "id": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "code": { "type": "string" }, "name": { "type": "string" } }
     },
     "MicroOrganization": {
       "type": "object", "required": ["id", "name", "path"],
-      "properties": { "id": { "type": "string", "minLength": 1 }, "name": { "type": "string" }, "path": { "type": "string" } }
+      "properties": { "id": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "name": { "type": "string" }, "path": { "type": "string" } }
     },
     "MicroRole": {
       "type": "object", "required": ["id", "name", "code"],
-      "properties": { "id": { "type": "string", "minLength": 1 }, "name": { "type": "string" }, "code": { "type": "string" } }
+      "properties": { "id": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "name": { "type": "string" }, "code": { "type": "string" } }
     },
     "MicroDataGrant": {
       "type": "object", "required": ["resource", "action", "scope", "subjectUserId", "tenantId", "organizationIds"],
       "properties": {
         "resource": { "type": "string", "minLength": 1 }, "action": { "type": "string", "minLength": 1 },
-        "scope": { "$ref": "#/$defs/MicroDataScope" }, "subjectUserId": { "type": "string", "minLength": 1 },
-        "tenantId": { "type": "string", "minLength": 1 },
-        "organizationIds": { "type": "array", "x-release-limit": { "maxItems": "maxOrganizationScopeIds" }, "items": { "type": "string", "minLength": 1 } }
+        "scope": { "$ref": "#/$defs/MicroDataScope" }, "subjectUserId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 },
+        "tenantId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 },
+        "organizationIds": { "type": "array", "x-release-limit": { "maxItems": "maxOrganizationScopeIds" }, "items": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 } }
       }
     },
     "MicroMenuType": { "type": "string", "enum": ["DIR", "MENU", "BUTTON"] },
@@ -43,7 +43,7 @@
       "type": "object", "required": ["id", "parentId", "type", "title", "path", "icon", "sortOrder", "visible"],
       "x-preserve-additional": true,
       "properties": {
-        "id": { "type": "string", "minLength": 1 }, "parentId": { "type": ["string", "null"] },
+        "id": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "parentId": { "type": ["string", "null"], "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$" },
         "type": { "$ref": "#/$defs/MicroMenuType" }, "title": { "type": "string" },
         "path": { "type": ["string", "null"] }, "icon": { "type": ["string", "null"] },
         "sortOrder": { "type": "integer" }, "visible": { "type": "boolean" },
@@ -53,10 +53,10 @@
     "MicroApplication": {
       "type": "object", "required": ["id", "name"],
       "properties": {
-        "id": { "type": "string", "minLength": 1 }, "name": { "type": "string" },
+        "id": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "name": { "type": "string" },
         "runtimeMode": { "$ref": "#/$defs/MicroRuntimeMode" }, "entryType": { "$ref": "#/$defs/MicroEntryType" },
         "entryUrl": { "type": "string" }, "deploymentVersion": { "type": ["string", "null"] },
-        "entryVersionId": { "type": ["string", "null"] }
+        "entryVersionId": { "type": ["string", "null"], "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$" }
       }
     },
     "AppAuthorizationContext": {
@@ -68,7 +68,7 @@
         "appCode": { "type": "string", "minLength": 1 }, "application": { "$ref": "#/$defs/MicroApplication" },
         "user": { "$ref": "#/$defs/MicroUser" }, "tenant": { "$ref": "#/$defs/MicroTenant" },
         "organization": { "$ref": "#/$defs/MicroOrganization" },
-        "organizationScopeIds": { "type": ["array", "null"], "x-release-limit": { "maxItems": "maxOrganizationScopeIds" }, "items": { "type": "string", "minLength": 1 }, "x-rust-tristate": true },
+        "organizationScopeIds": { "type": ["array", "null"], "x-release-limit": { "maxItems": "maxOrganizationScopeIds" }, "items": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "x-rust-tristate": true },
         "roles": { "type": "array", "items": { "$ref": "#/$defs/MicroRole" } },
         "permissions": { "type": "array", "items": { "type": "string" } },
         "dataGrants": { "type": "array", "items": { "$ref": "#/$defs/MicroDataGrant" } },
@@ -83,12 +83,12 @@
         "contractVersion": { "$ref": "#/$defs/MicroPropsContractVersion" },
         "contextVersion": { "type": "string", "minLength": 1 }, "contextEpoch": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
         "expiresAt": { "type": "string", "format": "date-time" }, "tokenExpiresAt": { "type": "string", "format": "date-time" },
-        "deploymentVersion": { "type": ["string", "null"] }, "entryVersionId": { "type": ["string", "null"] },
+        "deploymentVersion": { "type": ["string", "null"] }, "entryVersionId": { "type": ["string", "null"], "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$" },
         "appCode": { "type": "string", "minLength": 1 }, "basePath": { "type": "string", "minLength": 1 },
         "routePath": { "type": "string" }, "token": { "type": "string", "minLength": 1 },
         "user": { "$ref": "#/$defs/MicroUser" }, "tenant": { "$ref": "#/$defs/MicroTenant" },
         "organization": { "$ref": "#/$defs/MicroOrganization" },
-        "organizationScopeIds": { "type": ["array", "null"], "x-release-limit": { "maxItems": "maxOrganizationScopeIds" }, "items": { "type": "string", "minLength": 1 } },
+        "organizationScopeIds": { "type": ["array", "null"], "x-release-limit": { "maxItems": "maxOrganizationScopeIds" }, "items": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 } },
         "roles": { "type": "array", "items": { "$ref": "#/$defs/MicroRole" } },
         "permissions": { "type": "array", "items": { "type": "string" } },
         "dataGrants": { "type": "array", "items": { "$ref": "#/$defs/MicroDataGrant" } },
@@ -97,8 +97,8 @@
     },
     "NotificationTarget": {
       "oneOf": [
-        { "type": "object", "additionalProperties": false, "required": ["kind", "userId", "organizationId"], "properties": { "kind": { "const": "USER" }, "userId": { "type": "string", "minLength": 1 }, "organizationId": { "type": "string", "minLength": 1 } } },
-        { "type": "object", "additionalProperties": false, "required": ["kind", "organizationId"], "properties": { "kind": { "const": "ORGANIZATION" }, "organizationId": { "type": "string", "minLength": 1 } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "userId", "organizationId"], "properties": { "kind": { "const": "USER" }, "userId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "organizationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "organizationId"], "properties": { "kind": { "const": "ORGANIZATION" }, "organizationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 } } },
         { "type": "object", "additionalProperties": false, "required": ["kind"], "properties": { "kind": { "const": "TENANT" } } }
       ], "x-rust-tag": "kind"
     },
@@ -112,37 +112,37 @@
     },
     "NotificationPublication": {
       "type": "object", "required": ["publicationId", "recipientCount", "deliveryCount", "duplicate", "createdAt"],
-      "properties": { "publicationId": { "type": "string", "minLength": 1 }, "recipientCount": { "type": "integer", "minimum": 0 }, "deliveryCount": { "type": "integer", "minimum": 0 }, "duplicate": { "type": "boolean" }, "createdAt": { "type": "string", "format": "date-time" } }
+      "properties": { "publicationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "recipientCount": { "type": "integer", "minimum": 0 }, "deliveryCount": { "type": "integer", "minimum": 0 }, "duplicate": { "type": "boolean" }, "createdAt": { "type": "string", "format": "date-time" } }
     },
     "NotificationSocketContext": {
       "type": "object", "required": ["contractVersion", "userId", "tenantId", "organizationId", "expiresAt"],
-      "properties": { "contractVersion": { "$ref": "#/$defs/NotificationContractVersion" }, "userId": { "type": "string", "minLength": 1, "maxLength": 128 }, "tenantId": { "type": "string", "minLength": 1, "maxLength": 128 }, "organizationId": { "type": "string", "minLength": 1, "maxLength": 128 }, "expiresAt": { "type": "string", "format": "date-time" } }
+      "properties": { "contractVersion": { "$ref": "#/$defs/NotificationContractVersion" }, "userId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1, "maxLength": 128 }, "tenantId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1, "maxLength": 128 }, "organizationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1, "maxLength": 128 }, "expiresAt": { "type": "string", "format": "date-time" } }
     },
     "NotificationPlatformSocketContext": {
       "type": "object", "required": ["contractVersion", "userId", "tenantId", "organizationId", "sessionId", "expiresAt"],
-      "properties": { "contractVersion": { "$ref": "#/$defs/NotificationContractVersion" }, "userId": { "type": "string", "minLength": 1 }, "tenantId": { "type": "string", "minLength": 1 }, "organizationId": { "type": "string", "minLength": 1 }, "sessionId": { "type": "string", "minLength": 1 }, "expiresAt": { "type": "string", "format": "date-time" } }
+      "properties": { "contractVersion": { "$ref": "#/$defs/NotificationContractVersion" }, "userId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "tenantId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "organizationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "sessionId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "expiresAt": { "type": "string", "format": "date-time" } }
     },
     "RealtimeNotification": {
       "type": "object", "required": ["contractVersion", "id", "userId", "tenantId", "organizationId", "applicationId", "publicationId", "type", "title", "content", "link", "createdAt"],
       "allOf": [{ "oneOf": [
-        { "properties": { "applicationId": { "type": "string", "minLength": 1 }, "publicationId": { "type": "string", "minLength": 1 } } },
+        { "properties": { "applicationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "publicationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 } } },
         { "properties": { "applicationId": { "type": "null" }, "publicationId": { "type": "null" } } }
       ] }],
       "properties": {
-        "contractVersion": { "$ref": "#/$defs/NotificationContractVersion" }, "id": { "type": "string", "minLength": 1 }, "userId": { "type": "string", "minLength": 1 }, "tenantId": { "type": "string", "minLength": 1 }, "organizationId": { "type": "string", "minLength": 1 },
-        "applicationId": { "type": ["string", "null"], "minLength": 1 }, "publicationId": { "type": ["string", "null"], "minLength": 1 },
+        "contractVersion": { "$ref": "#/$defs/NotificationContractVersion" }, "id": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "userId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "tenantId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "organizationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 },
+        "applicationId": { "type": ["string", "null"], "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "publicationId": { "type": ["string", "null"], "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 },
         "type": { "$ref": "#/$defs/NotificationType" }, "title": { "type": "string", "minLength": 1, "maxLength": 200 }, "content": { "type": "string", "maxLength": 8192 }, "link": { "type": "string", "maxLength": 300 }, "createdAt": { "type": "string", "format": "date-time" }
       }
     },
     "NotificationRecord": {
       "type": "object", "required": ["id", "userId", "tenantId", "organizationId", "sourceKind", "applicationId", "publicationId", "applicationName", "type", "title", "content", "link", "isRead", "readAt", "createdAt"],
       "allOf": [{ "oneOf": [
-        { "properties": { "sourceKind": { "const": "APP" }, "applicationId": { "type": "string", "minLength": 1 }, "publicationId": { "type": "string", "minLength": 1 } } },
+        { "properties": { "sourceKind": { "const": "APP" }, "applicationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "publicationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 } } },
         { "properties": { "sourceKind": { "const": "SYSTEM" }, "applicationId": { "type": "null" }, "publicationId": { "type": "null" } } }
       ] }],
       "properties": {
-        "id": { "type": "string", "minLength": 1 }, "userId": { "type": "string", "minLength": 1 }, "tenantId": { "type": "string", "minLength": 1 }, "organizationId": { "type": "string", "minLength": 1 },
-        "sourceKind": { "$ref": "#/$defs/NotificationSourceKind" }, "applicationId": { "type": ["string", "null"], "minLength": 1 }, "publicationId": { "type": ["string", "null"], "minLength": 1 }, "applicationName": { "type": ["string", "null"] },
+        "id": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "userId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "tenantId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "organizationId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 },
+        "sourceKind": { "$ref": "#/$defs/NotificationSourceKind" }, "applicationId": { "type": ["string", "null"], "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "publicationId": { "type": ["string", "null"], "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "minLength": 1 }, "applicationName": { "type": ["string", "null"] },
         "type": { "$ref": "#/$defs/NotificationType" }, "title": { "type": "string", "minLength": 1, "maxLength": 200 }, "content": { "type": "string", "maxLength": 8192 }, "link": { "type": "string", "maxLength": 300 },
         "isRead": { "type": "boolean" }, "readAt": { "type": ["string", "null"], "format": "date-time" }, "createdAt": { "type": "string", "format": "date-time" }
       }
@@ -155,7 +155,7 @@
         "code": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Z][A-Z0-9_]{0,63}$" },
         "message": { "type": "string" }, "kind": { "$ref": "#/$defs/PublicRequestErrorKind" },
         "status": { "type": "integer", "minimum": 0, "maximum": 599 },
-        "requestId": { "type": "string", "format": "uuid" }
+        "requestId": { "type": "string", "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$", "format": "uuid" }
       }
     }
   }

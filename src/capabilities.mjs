@@ -8,7 +8,7 @@ const clientChecks = Object.freeze([
   ['TextDecoder', (env) => typeof env.TextDecoder === 'function'],
   ['ReadableStream', (env) => typeof env.ReadableStream === 'function'],
   ['Response.body', (env) => typeof env.Response === 'function' && 'body' in env.Response.prototype],
-  ['crypto.randomUUID', (env) => typeof env.crypto?.randomUUID === 'function'],
+  ['crypto.getRandomValues', (env) => typeof env.crypto?.getRandomValues === 'function'],
 ])
 
 const modeChecks = Object.freeze({

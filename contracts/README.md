@@ -1,19 +1,19 @@
 # 微应用公共协议
 
-本目录定义平台、微应用和后端之间共享的数据结构。结构来源为 [schema.json](schema.json)，版本和限额来源为 [release.json](../release.json)；消费者使用生成后登记在 `releases/2.0.0/` 中的固定材料。运行与消费方法见 [SDK README](../README.md)。
+本目录定义平台、微应用和后端之间共享的数据结构。结构来源为 [schema.json](schema.json)，版本和限额来源为 [release.json](../release.json)；消费者使用生成后登记在 `releases/3.0.0/` 中的固定材料。运行与消费方法见 [SDK README](../README.md)。
 
 ## 版本与数据边界
 
 | 协议或值 | 当前版本 / 支持值 | 使用位置 |
 | --- | --- | --- |
-| SDK | `2.0.0` | JavaScript 客户端及发布材料版本 |
+| SDK | `3.0.0` | JavaScript 客户端及发布材料版本 |
 | `AppAuthorizationContext.contractVersion` | `1.0` | 平台返回给业务服务的应用授权上下文 |
 | `MicroProps.contractVersion` | `2.0` | 宿主向前端微应用传递的业务上下文 |
 | 通知 `contractVersion` | `1.0` | Socket.IO 上下文和实时通知 |
 | `MicroEntryType` | `HTML` | qiankun HTML 入口 |
 | `MicroRuntimeMode` | `TRUSTED` | 可信微应用同页运行 |
 
-当前 Schema 不包含 iframe 通道版本、MessagePort、bridge 或宿主自定义 ESM 加载模式。`releases/1.0.0/` 中的旧协议属于历史归档；它不参与当前生成和运行时兼容判定。
+当前 Schema 不包含 iframe 通道版本、MessagePort、bridge 或宿主自定义 ESM 加载模式。`releases/1.0.0/` 中的旧协议属于历史归档；它不参与当前生成和运行时兼容判定。2.0.0 同样保留原始字节。当前 3.0.0 的系统 UUID 字段增加 v7 与 RFC variant 格式约束，wire 字段及独立协议版本不变。
 
 `MicroPropsWire` 是可序列化的数据部分：SDK 版本、上下文版本与 epoch、两个期限、应用与路由、令牌、用户/租户/组织、组织范围、角色、权限、数据授权、主题及菜单。`MicroProps` 在它之上增加 `AbortSignal`、`onNavigate(path)` 和 `onNotify(message, variant?)`。令牌及上下文只能在其用途和有效期内使用。
 

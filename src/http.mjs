@@ -1,3 +1,4 @@
+import { newUuid, isUuidV7, hasV7ContextIds } from './uuid.mjs'
 import { MICRO_PROPS_CONTRACT_VERSION, DEFAULT_MAX_JSON_RESPONSE_BYTES, MAX_HTTP_RESPONSE_BYTES,
   assertSupportedSdkVersion } from '../generated/protocol.mjs'
 
@@ -13,7 +14,6 @@ const messages = Object.freeze({
   PROTOCOL: 'Application response does not match the supported protocol',
   HTTP: 'Application request failed',
 })
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 export class MicroSdkError extends Error {
   constructor(kind, { status = 0, requestId, code } = {}) {
     super(messages[kind] || messages.PROTOCOL)
@@ -21,7 +21,7 @@ export class MicroSdkError extends Error {
     this.kind = Object.hasOwn(messages, kind) ? kind : 'PROTOCOL'
     this.status = Number.isInteger(status) && status >= 0 && status <= 599 ? status : 0
     this.code = typeof code === 'string' && /^[A-Z][A-Z0-9_]{0,63}$/.test(code) ? code : this.kind
-    if (typeof requestId === 'string' && uuid.test(requestId)) this.requestId = requestId
+    if (typeof requestId === 'string' && isUuidV7(requestId)) this.requestId = requestId
   }
   toJSON() {
     return { kind: this.kind, status: this.status, code: this.code, message: this.message,
@@ -86,7 +86,7 @@ export async function requestWithContext({ props, url, options = {}, fetchImpl =
       !['json', 'text'].includes(responseType)) throw protocolError('INVALID_RESPONSE_LIMIT')
   try { if (props?.sdkVersion !== undefined) assertSupportedSdkVersion(props.sdkVersion) }
   catch { throw protocolError('UNSUPPORTED_SDK_VERSION') }
-  if (props?.contractVersion !== MICRO_PROPS_CONTRACT_VERSION || typeof props.token !== 'string' || !props.token ||
+  if (props?.contractVersion !== MICRO_PROPS_CONTRACT_VERSION || !hasV7ContextIds(props) || typeof props.token !== 'string' || !props.token ||
       !props.signal || typeof props.signal.addEventListener !== 'function') throw protocolError('UNSUPPORTED_MICRO_PROPS')
   const request = new AbortController()
   const abort = () => request.abort()
@@ -102,7 +102,7 @@ export async function requestWithContext({ props, url, options = {}, fetchImpl =
     verify()
     const headers = new Headers(options.headers)
     const supplied = headers.get('X-Request-Id')
-    requestId = supplied && uuid.test(supplied) ? supplied : globalThis.crypto.randomUUID()
+    requestId = supplied && isUuidV7(supplied) ? supplied : newUuid()
     headers.set('X-Request-Id', requestId)
     headers.set('Authorization', 'Bearer ' + props.token)
     let response
@@ -121,7 +121,7 @@ export async function requestWithContext({ props, url, options = {}, fetchImpl =
       throw new MicroSdkError('PROTOCOL', { requestId, code: 'INVALID_RESPONSE' })
     }
     const echoed = response.headers.get('X-Request-Id')
-    if (echoed && uuid.test(echoed)) requestId = echoed
+    if (echoed && isUuidV7(echoed)) requestId = echoed
     if (!response.ok) {
       // Remote error text can contain credentials; never parse, retain or display it.
       response.body?.cancel?.().catch(() => {})

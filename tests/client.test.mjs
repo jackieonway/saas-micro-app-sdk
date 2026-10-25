@@ -1,22 +1,22 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
-import * as sdk from '../index.mjs'
+import * as sdk from '../src/index.mjs'
 import { SDK_VERSION, createContextClient, createNotificationPublisher, MicroSdkError, requestWithContext,
   authorizationContextSignature, sameAuthorizationContext, detectBrowserCapabilities, assertBrowserCapabilities,
-  CONTEXT_CONTRACT_VERSION, MICRO_PROPS_CONTRACT_VERSION, NOTIFICATION_CONTRACT_VERSION } from '../index.mjs'
+  CONTEXT_CONTRACT_VERSION, MICRO_PROPS_CONTRACT_VERSION, NOTIFICATION_CONTRACT_VERSION } from '../src/index.mjs'
 
 const deferred = () => { let resolve; const promise = new Promise(done => { resolve = done }); return { promise, resolve } }
 function props(extra = {}) {
   return { sdkVersion: SDK_VERSION, contractVersion: '2.0', appCode: 'orders', basePath: '/micro/orders', contextVersion: 'ctx', contextEpoch: 1,
     token: 'sentinel-private-token', expiresAt: new Date(Date.now() + 60000).toISOString(), tokenExpiresAt: new Date(Date.now() + 60000).toISOString(),
-    signal: new AbortController().signal, user: { id: 'u' }, tenant: { id: 't' }, organization: { id: 'o' }, ...extra }
+    signal: new AbortController().signal, user: { id: '019c0000-0000-7000-8000-000000000001' }, tenant: { id: '019c0000-0000-7000-8000-000000000002' }, organization: { id: '019c0000-0000-7000-8000-000000000003' }, ...extra }
 }
 const json = body => new Response(JSON.stringify(body), { headers: { 'Content-Type': 'application/json' } })
 const schema = JSON.parse(readFileSync(new URL('../contracts/schema.json', import.meta.url), 'utf8'))
 
-test('active SDK 2.0 entry retains independently versioned business contracts without iframe exports', () => {
-  assert.equal(SDK_VERSION, '2.0.0')
+test('active SDK 3.0 entry retains independently versioned business contracts without iframe exports', () => {
+  assert.equal(SDK_VERSION, '3.0.0')
   assert.equal(CONTEXT_CONTRACT_VERSION, '1.0')
   assert.equal(MICRO_PROPS_CONTRACT_VERSION, '2.0')
   assert.equal(NOTIFICATION_CONTRACT_VERSION, '1.0')
@@ -52,7 +52,7 @@ test('client capability failures expose fixed API names and tolerate throwing en
 })
 
 test('registered context client forces omitted credentials and captured Bearer, preserves a valid request identifier', async () => {
-  const requestId = '02345678-1234-4321-abcd-123456789abc', requests = []
+  const requestId = '02345678-1234-7321-abcd-123456789abc', requests = []
   const client = createContextClient(props(), async function (url, options) {
     assert.equal(this, undefined)
     requests.push({ url, ...options }); return json({ ok: true })
@@ -67,7 +67,7 @@ test('registered context client forces omitted credentials and captured Bearer, 
 })
 
 test('HTTP 401, 403 and 409 retain distinguishable structured status with bounded fixed diagnostics', async () => {
-  const requestId = '02345678-1234-4321-abcd-123456789abc'
+  const requestId = '02345678-1234-7321-abcd-123456789abc'
   for (const [status, kind] of [[401, 'UNAUTHORIZED'], [403, 'FORBIDDEN'], [409, 'CONFLICT'], [500, 'HTTP']]) {
     const client = createContextClient(props(), async () => new Response('sentinel-private-token https://secret.invalid/password', { status, headers: { 'X-Request-Id': requestId } }))
     await assert.rejects(client.requestJson('/orders'), error => {
@@ -157,11 +157,11 @@ test('caller cancellation, host cancellation and expired contexts fail closed', 
 })
 
 test('archived and unknown SDK versions are rejected while the versionless MicroProps baseline remains supported', () => {
-  for (const extra of [{ sdkVersion: '1.0.0' }, { sdkVersion: '1.0.1' }, { sdkVersion: '2.0.1' }, { contractVersion: '3.0' }]) {
+  for (const extra of [{ sdkVersion: '1.0.0' }, { sdkVersion: '1.0.1' }, { sdkVersion: '2.0.0' }, { sdkVersion: '2.0.1' }, { contractVersion: '3.0' }]) {
     assert.throws(() => createContextClient(props(extra)), error => error instanceof MicroSdkError && error.kind === 'PROTOCOL')
   }
   const legacy = createContextClient(props({ sdkVersion: undefined }))
-  assert.equal(legacy.sdkVersion, '2.0.0'); legacy.dispose()
+  assert.equal(legacy.sdkVersion, '3.0.0'); legacy.dispose()
   const client = createContextClient(props())
   assert.throws(() => client.update(props({ sdkVersion: '999.0.0' })), error => error.code === 'UNSUPPORTED_SDK_VERSION')
   assert.equal(client.current(), null)
@@ -177,7 +177,7 @@ test('text transport preserves CSV BOM, observes a smaller bound and forbids rai
 test('notification helper preserves event idempotency and only consumes the supplied active client', async () => {
   const requests = [], client = createContextClient(props(), async (url, options) => { requests.push({ url, ...options }); return json({ duplicate: true }) })
   const publisher = createNotificationPublisher(client), body = { idempotencyKey: 'event-stable', title: 'Reminder' }
-  assert.equal(publisher.sdkVersion, '2.0.0')
+  assert.equal(publisher.sdkVersion, '3.0.0')
   assert.deepEqual(await publisher.publish(body), { duplicate: true }); await publisher.publish(body)
   assert.equal(requests[0].url, '/api/apps/orders/notifications'); assert.equal(requests[0].body, requests[1].body)
   assert.equal(requests[0].credentials, 'omit')

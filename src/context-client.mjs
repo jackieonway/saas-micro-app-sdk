@@ -2,6 +2,7 @@ import { SDK_VERSION, MICRO_PROPS_CONTRACT_VERSION, assertSupportedSdkVersion } 
 import { contextAbortError, protocolError, requestWithContext } from './http.mjs'
 import { assertBrowserCapabilities } from './capabilities.mjs'
 import { authorizationContextSignature } from './context-updates.mjs'
+import { hasV7ContextIds } from './uuid.mjs'
 
 /** Browser display/request helper. Business services still authenticate and authorize every request. */
 export function createContextClient(initialProps, fetchImpl = globalThis.fetch) {
@@ -16,7 +17,7 @@ export function createContextClient(initialProps, fetchImpl = globalThis.fetch) 
     if (next?.contractVersion !== MICRO_PROPS_CONTRACT_VERSION || typeof next.token !== 'string' || !next.token ||
         !next.signal || typeof next.signal.addEventListener !== 'function' ||
         !Number.isSafeInteger(next.contextEpoch) || next.contextEpoch <= 0 || !next.contextVersion ||
-        !next.user?.id || !next.tenant?.id || !next.organization?.id) {
+        !hasV7ContextIds(next)) {
       stop(); throw protocolError('UNSUPPORTED_MICRO_PROPS')
     }
     const nextKey = authorizationContextSignature(next)

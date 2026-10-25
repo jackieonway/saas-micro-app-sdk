@@ -33,8 +33,8 @@ test('fixed generation is deterministic and only produces current SDK artifacts'
   const first = await generateArtifacts({ root }), second = await generateArtifacts({ root })
   assert.deepEqual([...first.artifacts], [...second.artifacts])
   assert([...first.artifacts.keys()].every(file => file.startsWith(sdk + '/')))
-  assert(![...first.artifacts.keys()].some(file => /releases\/1\.0\.0|bridge|compat/.test(file)))
-  assert.equal((await syncSdk({ root, check: true })).sdkVersion, '2.0.0')
+  assert(![...first.artifacts.keys()].some(file => /releases\/[12]\.0\.0|bridge|compat/.test(file)))
+  assert.equal((await syncSdk({ root, check: true })).sdkVersion, SDK_VERSION)
   const manifest = JSON.parse(readFileSync(path.join(root, sdk, 'releases', SDK_VERSION, 'artifact-manifest.json')))
   for (const file of manifest.files) {
     const bytes = readFileSync(path.join(root, sdk, 'releases', SDK_VERSION, file.path))
@@ -45,6 +45,15 @@ test('fixed generation is deterministic and only produces current SDK artifacts'
   const schema = JSON.parse(readFileSync(path.join(root, sdk, 'generated/schema.json')))
   assert.deepEqual(schema.$defs.MicroEntryType.enum, ['HTML'])
   assert.deepEqual(schema.$defs.MicroRuntimeMode.enum, ['TRUSTED'])
+  const identity = schema.$defs.MicroUser.properties.id.pattern
+  assert.ok(new RegExp(identity).test('019c0000-0000-7000-8000-000000000002'))
+  for (const value of ['019c0000-0000-4000-8000-000000000002', '00000000-0000-0000-0000-000000000000', '019c0000-0000-7000-c000-000000000002']) {
+    assert.equal(new RegExp(identity).test(value), false)
+  }
+  for (const definition of ['MicroPropsWire', 'AppAuthorizationContext']) {
+    assert.equal(schema.$defs[definition].properties.organizationScopeIds.items.pattern, identity)
+  }
+  assert.equal(schema.$defs.PublicRequestError.properties.requestId.pattern, identity)
 })
 
 test('generated file drift fails check without rewriting the changed input', async t => {
@@ -72,7 +81,7 @@ test('unregistered active release files are rejected without deletion', async t 
 
 test('only current registered SDK versions are accepted without echoing unsupported input', () => {
   assert.equal(isSupportedSdkVersion(SDK_VERSION), true)
-  for (const version of ['1.0.0', '1.99.0', '2.0.1', 'sentinel-private-token', null, {}]) {
+  for (const version of ['1.0.0', '1.99.0', '2.0.0', '2.0.1', 'sentinel-private-token', null, {}]) {
     assert.equal(isSupportedSdkVersion(version), false)
     assert.throws(() => assertSupportedSdkVersion(version), error => error.code === 'UNSUPPORTED_SDK_VERSION' && !String(error).includes('sentinel'))
   }
@@ -82,12 +91,15 @@ test('only current registered SDK versions are accepted without echoing unsuppor
   assert.throws(() => validateRelease({ ...release, contracts: { ...release.contracts, iframe: '2.0' } }))
 })
 
-test('release 1.0.0 remains the exact immutable archive and is never regenerated', async () => {
-  const base = path.join(root, sdk, 'releases/1.0.0')
+for (const [version, manifestHash] of [
+  ['1.0.0', 'd3137ecd7588e59df7151b5c533adfdc0a72eedf36138f038928538cf914b1dc'],
+  ['2.0.0', '2e6007209f63dba709157eb6cd37ef7c4961c679e10b2dbbfad6690836143c3c'],
+]) test(`release ${version} remains the exact immutable archive and is never regenerated`, async () => {
+  const base = path.join(root, sdk, 'releases', version)
   const originalManifest = readFileSync(path.join(base, 'artifact-manifest.json'))
-  assert.equal(sha(originalManifest), 'd3137ecd7588e59df7151b5c533adfdc0a72eedf36138f038928538cf914b1dc')
+  assert.equal(sha(originalManifest), manifestHash)
   const manifest = JSON.parse(originalManifest)
-  assert.equal(manifest.sdkVersion, '1.0.0')
+  assert.equal(manifest.sdkVersion, version)
   for (const file of manifest.files) {
     const bytes = readFileSync(path.join(base, file.path))
     assert.equal(bytes.length, file.bytes, file.path)
@@ -97,21 +109,33 @@ test('release 1.0.0 remains the exact immutable archive and is never regenerated
   assert.deepEqual(readFileSync(path.join(base, 'artifact-manifest.json')), originalManifest)
 })
 
-test('classic package installs only MicroSdk and no bridge, lifecycle or channel APIs', () => {
-  const classic = readFileSync(path.join(root, sdk, 'releases/2.0.0/sdk.js'), 'utf8')
+test('classic package installs only MicroSdk and generates v7 request IDs in its browser runtime', async () => {
+  const classic = readFileSync(path.join(root, sdk, `releases/${SDK_VERSION}/sdk.js`), 'utf8')
   assert.doesNotMatch(classic, /installIframeBridge|MicroIframe|__MICRO_APP__|MessageChannel|MessagePort|IFRAME_PROTOCOL_VERSION/)
   const window = {}
-  vm.runInNewContext(classic, { window })
+  vm.runInNewContext(classic, { window, crypto, fetch, Headers, URL, AbortController, DOMException, Uint8Array,
+    TextEncoder, TextDecoder, ReadableStream, Response })
   assert.deepEqual(Object.keys(window), ['MicroSdk'])
-  assert.equal(window.MicroSdk.sdkVersion, '2.0.0')
+  assert.equal(window.MicroSdk.sdkVersion, SDK_VERSION)
   assert.equal(Object.isFrozen(window.MicroSdk), true)
   for (const key of ['createContextClient', 'createNotificationPublisher', 'requestWithContext']) assert.equal(typeof window.MicroSdk[key], 'function')
+  let requestId
+  const client = window.MicroSdk.createContextClient({ sdkVersion: SDK_VERSION, contractVersion: '2.0',
+    appCode: 'orders', basePath: '/micro/orders', contextVersion: 'bundle-fixture', contextEpoch: 1,
+    token: 'fixture-token', signal: new AbortController().signal,
+    expiresAt: new Date(Date.now() + 60000).toISOString(), tokenExpiresAt: new Date(Date.now() + 60000).toISOString(),
+    user: { id: '019c0000-0000-7000-8000-000000000002' }, tenant: { id: '019c0000-0000-7000-8000-000000000003' },
+    organization: { id: '019c0000-0000-7000-8000-000000000004' },
+  }, async (_, options) => { requestId = options.headers.get('X-Request-Id'); return new Response('{}') })
+  await client.requestJson('/orders')
+  assert.match(requestId, /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
+  client.dispose()
 })
 
 test('standalone release declarations expose standard qiankun props and reject removed APIs and modes', t => {
   const directory = isolated(t)
   const require = createRequire(new URL('../package.json', import.meta.url)), ts = require('typescript')
-  const module = path.join(directory, sdk, 'releases/2.0.0/index.mjs').replaceAll('\\', '/')
+  const module = path.join(directory, sdk, `releases/${SDK_VERSION}/index.mjs`).replaceAll('\\', '/')
   const file = path.join(directory, 'consumer.mts')
   writeFileSync(file, `import {SDK_VERSION,createContextClient,MicroSdkError,detectBrowserCapabilities} from ${JSON.stringify(module)}\n`
     + `import type {MicroProps,AppAuthorizationContext,NotificationPublishBody,QiankunProps,QiankunLifecycle,MicroEntryType,MicroRuntimeMode} from ${JSON.stringify(module)}\n`
