@@ -1,17 +1,7 @@
-# Release 日志
+# 当前系统基线
 
-## 3.0.0 — 2026-10-24
+2026-10-26 起按全新系统维护。当前软件版本以本仓库的 Cargo.toml、package.json 和固定 SDK manifest 为准。
 
-- 登记新的 `REPOSITORY_CANDIDATE` 交付版本，系统身份与请求标识统一要求 RFC UUID v7。拒绝旧 v4、nil 和错误 variant；使用固定 `uuid@13.0.0` 及 `crypto.getRandomValues` 生成 v7。
-- SDK 主版本变化，MicroProps 2.0、Context 1.0、Notification 1.0 的字段与独立版本保持不变。当前支持集合仅含 SDK 3.0.0。
-- 新建 `releases/3.0.0/` 并更新根导出、Schema、TypeScript 与 Rust DTO；1.0.0/2.0.0 历史发布字节保持不变。此登记不代表已经发布到外部 npm registry。
-- 生成与字节检查通过，30 项 SDK 测试通过，包括安全生成、旧 ID 拒绝、独立消费及两个历史归档验证。
+数据库系统仅使用当前 `0001` 初始化基线，不兼容旧迁移链或旧业务数据。平台账号登录统一使用 SSO/OIDC BFF；业务服务与前端继续按各自现行合同运行。
 
-## 2.0.1 — 2026-10-23
-
-- 仓库开发工具包由 `2.0.0` 升级为 `2.0.1`。本次变更仅涉及 Node.js 工具链；`release.json.sdkVersion`、SDK 运行时、固定发布目录 `releases/2.0.0/` 和消费者协议继续使用 `2.0.0`。
-- Node.js 开发、生成与 CI 基线从 `24.18.0` 升级为安全版本 `24.22.1`；同步 `.nvmrc`、`.node-version`，并为根包与锁文件新增 `>=24.22.1 <25` 引擎约束。npm 基线仍为 `11.16.0`。
-- 对照 [Node.js 2026-10-21 官方安全公告](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases)及 [24.22.1 发布说明](https://nodejs.org/en/blog/release/v24.22.1)，原 `24.18.0` 属于受影响的 24.x 版本线。本次升级覆盖该版本线的 8 个漏洞：`CVE-2026-105482`、`CVE-2026-105483`、`CVE-2026-106069`、`CVE-2026-111497`、`CVE-2026-105481`、`CVE-2026-106072`、`CVE-2026-106074`、`CVE-2026-106073`，涉及 DNS、TLS、Brotli 解码、HTTP 长连接、快照随机值和权限模型。`CVE-2026-106070` 与 `CVE-2026-106071` 仅影响 26.x，不属于当前命中范围。
-- SDK 在浏览器中运行，Node.js 用于开发、生成与验证。开发机和 CI 需实际使用 `24.22.1`；需要交付应用时，用升级后的工具链重新构建并部署新的应用产物。现有 SDK 固定交付字节与历史归档不因工具链升级而重写。
-
-验证结果：在 Node.js `24.22.1` 下，`npm ci --ignore-scripts --no-audit --no-fund`、`npm run check`、`npm test` 全部通过；检查确认 20 个生成产物保持一致，24 项测试全部通过，包含旧版本归档不变性验证。
+旧阶段实施、迁移搬运和临时验收记录已清理。具体初始化、配置和验证命令见本仓库 README；当前验证结论只以本次报告为准，不继承旧日期的通过数量。
