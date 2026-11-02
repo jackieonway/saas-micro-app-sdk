@@ -66,9 +66,14 @@ export async function generateArtifacts({ root = repository } = {}) {
   } }
   // The async build API supports a canonical virtual protocol module; see below.
   const { build } = require('esbuild')
-  const compile = async (entry,format) => (await build({ absWorkingDir:root,entryPoints:[`${sdkRelative}/src/${entry}`],
+  const compile = async (entry,format) => {
+    const result = await build({ absWorkingDir:root,entryPoints:[`${sdkRelative}/src/${entry}`],
     nodePaths:[path.join(repository,'node_modules')],bundle:true,format,platform:'browser',target:'es2022',write:false,charset:'utf8',legalComments:'inline',plugins:[plugin],
-    banner:{js:`/* Generated SaaS Micro SDK ${release.sdkVersion}; source: ${sdkRelative}/release.json */`},logLevel:'silent' })).outputFiles[0].text
+    banner:{js:`/* Generated SaaS Micro SDK ${release.sdkVersion}; source: ${sdkRelative}/release.json */`},logLevel:'silent' })
+    // esbuild labels bundled dependencies relative to the temporary workspace,
+    // or with absolute paths across Windows drives. Keep those comments portable.
+    return result.outputFiles[0].text.replace(/^(\s*\/\/ ).*[/\\]node_modules[/\\](.+)$/gm, '$1node_modules/$2')
+  }
   const classic = await compile('classic-entry.mjs','iife'), esm = await compile('index.mjs','esm')
   const base = `${sdkRelative}/releases/${release.sdkVersion}`
   const packageInfo = {name:'@saas-platform/micro-app-sdk',version:release.sdkVersion,private:true,type:'module',

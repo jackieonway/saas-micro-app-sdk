@@ -20,7 +20,7 @@ function assertSupportedSdkVersion(value) {
   }
 }
 
-// D:/WorkSpace/rust/rust-saas/saas-micro-app-sdk/node_modules/uuid/dist/stringify.js
+// node_modules/uuid/dist/stringify.js
 var byteToHex = [];
 for (let i = 0; i < 256; ++i) {
   byteToHex.push((i + 256).toString(16).slice(1));
@@ -29,7 +29,7 @@ function unsafeStringify(arr, offset = 0) {
   return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
 }
 
-// D:/WorkSpace/rust/rust-saas/saas-micro-app-sdk/node_modules/uuid/dist/rng.js
+// node_modules/uuid/dist/rng.js
 var getRandomValues;
 var rnds8 = new Uint8Array(16);
 function rng() {
@@ -42,7 +42,7 @@ function rng() {
   return getRandomValues(rnds8);
 }
 
-// D:/WorkSpace/rust/rust-saas/saas-micro-app-sdk/node_modules/uuid/dist/v7.js
+// node_modules/uuid/dist/v7.js
 var _state = {};
 function v7(options, buf, offset) {
   let bytes;

@@ -56,6 +56,19 @@ test('fixed generation is deterministic and only produces current SDK artifacts'
   assert.equal(schema.$defs.PublicRequestError.properties.requestId.pattern, identity)
 })
 
+test('bundles and manifests are independent of checkout and temporary workspace paths', async t => {
+  const relocated = path.join(isolated(t), 'nested', 'checkout')
+  mkdirSync(path.join(relocated, sdk), { recursive: true })
+  cpSync(path.join(root, sdk), path.join(relocated, sdk), { recursive: true })
+  const original = await generateArtifacts({ root }), moved = await generateArtifacts({ root: relocated })
+  assert.deepEqual([...moved.artifacts], [...original.artifacts])
+  for (const filename of ['index.mjs', 'sdk.js']) {
+    const content = original.artifacts.get(`${sdk}/releases/${SDK_VERSION}/${filename}`)
+    assert.match(content, /^\s*\/\/ node_modules\/uuid\//m)
+    assert.doesNotMatch(content, /^\s*\/\/ .*[/\\]node_modules[/\\]/m)
+  }
+})
+
 test('generated file drift fails check without rewriting the changed input', async t => {
   const directory = isolated(t)
   const { artifacts } = await generateArtifacts({ root: directory })

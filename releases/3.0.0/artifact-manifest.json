@@ -29,8 +29,8 @@
     },
     {
       "path": "index.mjs",
-      "bytes": 20936,
-      "sha256": "48922ad23bfddc9d65b8d18b61769940b987405ab4e749a7003c86552734f067"
+      "bytes": 20795,
+      "sha256": "d0777fb485e02aceaad3e21609595bb66fe4e23d23271a1749e7981789dc4ac2"
     },
     {
       "path": "package.json",
@@ -59,8 +59,8 @@
     },
     {
       "path": "sdk.js",
-      "bytes": 22996,
-      "sha256": "cd4143e916c4aba29cccbf1974b7b355a6aed6141a4ed45b657c37b2c94bfb71"
+      "bytes": 22855,
+      "sha256": "682efbfe20ab5de9673ae343ebeaf51fb6989ebb2754000f22097fc2f46156ae"
     },
     {
       "path": "types.d.ts",
