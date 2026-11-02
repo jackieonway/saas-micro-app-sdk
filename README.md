@@ -137,6 +137,8 @@ await publisher.publish({
 
 这里的发布 API 与独立 Socket.IO 通知服务职责不同：发布和收件箱持久化属于平台 HTTP API，实时提示由 [通知服务](../saas-notification/README.md)负责；微应用 SDK 不创建 Socket.IO 连接。
 
+此 SDK 3.0.0 发布助手消费宿主颁发的内部 `app_session`，公共端点不接受外部 OAuth Token。使用外部 canonical USER 的工单等资源服务应通过独立 Basic 服务凭据和原 token，调用平台的[私有通知发布／结果合同](../saas-plateform/backend/docs/designs/unified-auth/phase-18-private-notification-contract.md)。该适配器运行在服务端，不把外部 token 转为内部 JWT，也不向微应用分发服务密钥；MACHINE 和 CUSTOMER 仍不能发布员工提醒。切换后应卸载旧实例并取得新的宿主能力；保留的旧 client 不得更新成另一账号或组织的凭据后重试原操作。
+
 ## 固定交付与升级
 
 交付时保存 SDK 版本、源码修订和 `artifact-manifest.json`，按清单检查每个文件的大小与 SHA-256。消费者构建从固定副本读取，不追踪 SDK 仓库分支、不共享 `node_modules`、不在构建期间调用上游生成器。升级时重新审核声明、Schema、协议版本、可执行字节和摘要，再更新消费者来源记录。
